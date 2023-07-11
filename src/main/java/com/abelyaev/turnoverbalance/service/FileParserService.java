@@ -1,9 +1,9 @@
 package com.abelyaev.turnoverbalance.service;
 
 import com.abelyaev.turnoverbalance.model.dto.TableInfoDto;
-import com.abelyaev.turnoverbalance.model.entity.FileDuplicates;
+import com.abelyaev.turnoverbalance.model.entity.Files;
 import com.abelyaev.turnoverbalance.model.exception.ParseFileException;
-import com.abelyaev.turnoverbalance.repository.FileDuplicatesRepository;
+import com.abelyaev.turnoverbalance.repository.FilesRepository;
 import com.abelyaev.turnoverbalance.utils.ParseFileUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -27,7 +27,7 @@ public class FileParserService {
     private final ParseFileUtils parseFileUtils;
 
     @Autowired
-    FileDuplicatesRepository fileDuplicatesRepository;
+    FilesRepository filesRepository;
 
     public String parseFile(MultipartFile reapExcelDataFile) throws ParseFileException {
         XSSFWorkbook workbook = null;
@@ -38,7 +38,7 @@ public class FileParserService {
         }
         XSSFSheet sheet = workbook.getSheetAt(0);
         String result = findTurnoverBalanceDuplicates(sheet);
-        fileDuplicatesRepository.save(new FileDuplicates(reapExcelDataFile.getOriginalFilename(), result));
+        filesRepository.save(new Files(reapExcelDataFile.getOriginalFilename(), result));
         return result;
     }
 

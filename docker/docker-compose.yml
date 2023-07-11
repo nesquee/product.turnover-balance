@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+  turnover-balance:
+    container_name: turnover-balance
+    build:
+      context: .././
+      dockerfile: docker/turnover-balance.dockerfile
+    image: turnover-balance:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  db:
+    container_name: database
+    image: postgres:14.1-alpine
+    environment:
+      - POSTGRES_USER=tb
+      - POSTGRES_PASSWORD=meme
+    volumes:
+      - db-volume:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    ports:
+      - '5432:5432'
+
+volumes:
+  db-volume:
+    driver: local
