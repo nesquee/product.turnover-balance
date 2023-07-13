@@ -1,8 +1,21 @@
-create table auth
+create table users
 (
-    id   integer,
-    role varchar(255)
+    id            serial
+        constraint users_pk
+            primary key,
+    username      varchar(64)           not null,
+    password      varchar(255)          not null,
+    role          varchar(32)           not null,
+    first_name    varchar(32)           not null,
+    last_name     varchar(255)          not null,
+    enabled       boolean default false not null,
+    create_date   timestamp,
+    update_date   timestamp
 );
+
+create unique index users_username_uindex
+    on users (username);
+
 create table files
 (
     id   integer,

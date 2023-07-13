@@ -1,7 +1,7 @@
 package com.abelyaev.turnoverbalance.service;
 
 import com.abelyaev.turnoverbalance.model.dto.TableInfoDto;
-import com.abelyaev.turnoverbalance.model.entity.Files;
+import com.abelyaev.turnoverbalance.model.entity.FilesEntity;
 import com.abelyaev.turnoverbalance.model.exception.ParseFileException;
 import com.abelyaev.turnoverbalance.repository.FilesRepository;
 import com.abelyaev.turnoverbalance.utils.ParseFileUtils;
@@ -38,7 +38,7 @@ public class FileParserService {
         }
         XSSFSheet sheet = workbook.getSheetAt(0);
         String result = findTurnoverBalanceDuplicates(sheet);
-        filesRepository.save(new Files(reapExcelDataFile.getOriginalFilename(), result));
+        filesRepository.save(new FilesEntity(reapExcelDataFile.getOriginalFilename(), result));
         return result;
     }
 

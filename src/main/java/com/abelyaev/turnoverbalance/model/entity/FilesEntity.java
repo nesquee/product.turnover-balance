@@ -8,14 +8,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Table(name = "files")
 @Schema(description = "Информация о файле и дубликатах")
-public class Files {
+public class FilesEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fileduplicate_seq")
@@ -28,7 +27,7 @@ public class Files {
     @Column(name = "duplicates")
     private String duplicates;
 
-    public Files(String fileName, String duplicates) {
+    public FilesEntity(String fileName, String duplicates) {
         this.fileName = fileName;
         this.duplicates = duplicates;
     }

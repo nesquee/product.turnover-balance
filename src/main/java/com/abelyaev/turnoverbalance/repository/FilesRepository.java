@@ -1,14 +1,14 @@
 package com.abelyaev.turnoverbalance.repository;
 
-import com.abelyaev.turnoverbalance.model.entity.Files;
+import com.abelyaev.turnoverbalance.model.entity.FilesEntity;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface FilesRepository extends CrudRepository<Files, Long> {
+public interface FilesRepository extends JpaRepository<FilesEntity, Integer> {
 
     @Query(value = "select * from files where file = ?1", nativeQuery = true)
-    List<Files> findFByFileName(String fileName);
+    List<FilesEntity> findFByFileName(String fileName);
 }
