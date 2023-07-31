@@ -1,5 +1,6 @@
 package com.abelyaev.turnoverbalance.service.authservices;
 
+import com.abelyaev.turnoverbalance.mapper.UserMapper;
 import com.abelyaev.turnoverbalance.model.dto.authdto.AuthenticationRequest;
 import com.abelyaev.turnoverbalance.model.dto.authdto.AuthenticationResponse;
 import com.abelyaev.turnoverbalance.model.dto.authdto.RegisterRequest;
@@ -21,6 +22,8 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserMapper userMapper;
+
     public AuthenticationResponse register(RegisterRequest request) {
         Date dateNow = new Date();
         var user = UserEntity.builder()
@@ -34,7 +37,7 @@ public class AuthenticationService {
                 .updateDate(dateNow)
                 .build();
         userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(userMapper.map(user));
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -45,7 +48,7 @@ public class AuthenticationService {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(userMapper.map(user));
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
