@@ -14,9 +14,9 @@ services:
 
   db:
     container_name: database
-    image: postgres:14.1-alpine
+    image: postgres:12.2
     environment:
-      - POSTGRES_USER=tb
+      - POSTGRES_USER=turnover_balance
       - POSTGRES_PASSWORD=meme
     volumes:
       - db-volume:/var/lib/postgresql/data

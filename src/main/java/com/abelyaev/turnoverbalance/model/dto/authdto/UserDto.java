@@ -1,65 +1,25 @@
 package com.abelyaev.turnoverbalance.model.dto.authdto;
 
-import com.abelyaev.turnoverbalance.model.enums.Role;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.abelyaev.turnoverbalance.model.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
+
 
 @Data
-public class UserDto implements UserDetails {
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class UserDto {
     private Long id;
-
     private String username;
-
-    private String firstName;
-
-    private String lastName;
-
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
+    private UserRole role;
+    private String firstName;
+    private String lastName;
     private boolean enabled;
-
-    private Date createDate;
-
-    private Date updateDate;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

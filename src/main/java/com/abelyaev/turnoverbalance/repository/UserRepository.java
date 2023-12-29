@@ -1,11 +1,10 @@
 package com.abelyaev.turnoverbalance.repository;
 
 import com.abelyaev.turnoverbalance.model.entity.UserEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Mono;
 
-import java.util.Optional;
+public interface UserRepository extends ReactiveCrudRepository<UserEntity, Long> {
 
-public interface UserRepository extends JpaRepository<UserEntity, Integer> {
-
-    Optional<UserEntity> findByUsername(String username);
+    Mono<UserEntity> findByUsername(String username);
 }

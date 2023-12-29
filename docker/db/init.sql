@@ -1,27 +1,18 @@
-create table users
-(
-    id            serial
-        constraint users_pk
-            primary key,
-    username      varchar(64)           not null,
-    password      varchar(255)          not null,
-    role          varchar(32)           not null,
-    first_name    varchar(32)           not null,
-    last_name     varchar(255)          not null,
-    enabled       boolean default false not null,
-    create_date   timestamp,
-    update_date   timestamp
+CREATE TABLE users (
+                       id         SERIAL PRIMARY KEY,
+                       username   VARCHAR(64)   NOT NULL UNIQUE,
+                       password   VARCHAR(2048) NOT NULL,
+                       role       VARCHAR(32)   NOT NULL,
+                       first_name VARCHAR(64)   NOT NULL,
+                       last_name  VARCHAR(64)   NOT NULL,
+                       enabled    BOOLEAN       NOT NULL DEFAULT FALSE,
+                       created_at TIMESTAMP,
+                       updated_at TIMESTAMP
 );
 
-create unique index users_username_uindex
-    on users (username);
-
-create table files
+CREATE TABLE files
 (
-    id   integer,
-    filename varchar(255),
-    duplicates varchar(255)
+    id         SERIAL PRIMARY KEY,
+    filename   VARCHAR(255),
+    duplicates VARCHAR(255)
 );
-create sequence fileduplicate_seq
-    as integer
-    maxvalue 999999999;
