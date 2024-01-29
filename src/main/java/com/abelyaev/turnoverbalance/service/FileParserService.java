@@ -1,16 +1,16 @@
 package com.abelyaev.turnoverbalance.service;
 
 import com.abelyaev.turnoverbalance.model.dto.TableInfoDto;
-import com.abelyaev.turnoverbalance.model.entity.Files;
-import com.abelyaev.turnoverbalance.model.exception.ParseFileException;
+import com.abelyaev.turnoverbalance.model.entity.FilesEntity;
 import com.abelyaev.turnoverbalance.repository.FilesRepository;
 import com.abelyaev.turnoverbalance.utils.ParseFileUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -20,32 +20,41 @@ import java.util.stream.IntStream;
 
 import static com.abelyaev.turnoverbalance.constants.Constant.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FileParserService {
 
     private final ParseFileUtils parseFileUtils;
+    private final FilesRepository filesRepository;
 
-    @Autowired
-    FilesRepository filesRepository;
-
-    public String parseFile(MultipartFile reapExcelDataFile) throws ParseFileException {
-        XSSFWorkbook workbook = null;
-        try {
-            workbook = new XSSFWorkbook(reapExcelDataFile.getInputStream());
-        } catch (IOException e) {
-            throw new ParseFileException("Ошибка парсинга файла: " + e.getMessage());
-        }
-        XSSFSheet sheet = workbook.getSheetAt(0);
-        String result = findTurnoverBalanceDuplicates(sheet);
-        filesRepository.save(new Files(reapExcelDataFile.getOriginalFilename(), result));
-        return result;
+    public Flux<String> parseFile(Flux<Part> file) {
+        return file
+                .flatMapSequential(part -> part.content()
+                        .map(dataBuffer -> {
+                            try {
+                                XSSFWorkbook workbook = new XSSFWorkbook(dataBuffer.asInputStream());
+                                XSSFSheet sheet = workbook.getSheetAt(0);
+                                String result = findTurnoverBalanceDuplicates(sheet);
+                                String fileName = part.headers().getContentDisposition().getFilename();
+                                filesRepository.save(FilesEntity.builder()
+                                                .filename(fileName)
+                                                .duplicates(result)
+                                                .build())
+                                        .subscribe();
+                                return result;
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }))
+                .onErrorReturn("PARSE ERROR");
     }
 
     /**
      * 1 - ищем в какой ячейке находится сальдо на конец периода
      * 2 - находим ячейки начала первой таблицы и заполняем компании с не нулевой суммой сальдо
      * 3 - находим ячейки начала второй таблицы и находим дубликаты с не нулевой суммой сальдо
+     *
      * @param sheet
      */
     private String findTurnoverBalanceDuplicates(XSSFSheet sheet) {
