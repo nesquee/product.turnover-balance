@@ -1,7 +1,9 @@
 package com.abelyaev.turnoverbalance.service;
 
+import com.abelyaev.turnoverbalance.model.dto.BalanceInfo;
 import com.abelyaev.turnoverbalance.model.dto.TableInfoDto;
 import com.abelyaev.turnoverbalance.model.entity.FilesEntity;
+import com.abelyaev.turnoverbalance.producer.BalanceProducer;
 import com.abelyaev.turnoverbalance.repository.FilesRepository;
 import com.abelyaev.turnoverbalance.utils.ParseFileUtils;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +16,10 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static com.abelyaev.turnoverbalance.constants.Constant.*;
@@ -27,24 +31,26 @@ public class FileParserService {
 
     private final ParseFileUtils parseFileUtils;
     private final FilesRepository filesRepository;
+    private final BalanceProducer balanceProducer;
 
     public Flux<String> parseFile(Flux<Part> file) {
         return file
                 .flatMapSequential(part -> part.content()
-                        .map(dataBuffer -> {
+                        .<String>handle((dataBuffer, sink) -> {
                             try {
                                 XSSFWorkbook workbook = new XSSFWorkbook(dataBuffer.asInputStream());
                                 XSSFSheet sheet = workbook.getSheetAt(0);
                                 String result = findTurnoverBalanceDuplicates(sheet);
                                 String fileName = part.headers().getContentDisposition().getFilename();
+                                balanceProducer.sendMessage(new BalanceInfo(UUID.randomUUID().toString(), fileName, result, new Date()));
                                 filesRepository.save(FilesEntity.builder()
                                                 .filename(fileName)
                                                 .duplicates(result)
                                                 .build())
                                         .subscribe();
-                                return result;
+                                sink.next(result);
                             } catch (IOException e) {
-                                throw new RuntimeException(e);
+                                sink.error(new RuntimeException(e));
                             }
                         }))
                 .onErrorReturn("PARSE ERROR");
